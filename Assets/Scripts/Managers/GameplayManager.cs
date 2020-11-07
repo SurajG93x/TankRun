@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameplayManager : MonoBehaviour
 {
@@ -13,8 +15,15 @@ public class GameplayManager : MonoBehaviour
     public GameObject[] lanes;
 
     public float minObstacleDelay = 10f, maxObsDelay = 40f;
+
     private float halfGroundSize;
     private GameController playerController;
+    private Text scoreText;
+    private int scoreVal;
+
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private GameObject gameoverPanel;
+    [SerializeField] private Button shootBtn;
 
     private void Awake()
     {
@@ -27,9 +36,25 @@ public class GameplayManager : MonoBehaviour
         playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<GameController>();
 
         StartCoroutine("GenerateObstacles");
+
+        scoreText = GameObject.Find("Score").GetComponent<Text>();
     }
 
-    // Update is called once per frame
+    public void Update()
+    {
+        RaycastHit hit;
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit, 25))
+            {
+                Debug.Log(hit.collider.gameObject.name);
+            }
+        }
+    }
+
+
+        // Update is called once per frame
 
     void MakeInstance()
     {
@@ -114,5 +139,46 @@ public class GameplayManager : MonoBehaviour
             Vector3 shift = new Vector3(Random.Range(-0.5f, 0.5f), 0f, Random.Range(1, 10) * i);
             Instantiate(zombies[Random.Range(0, zombies.Length)], pos + shift * i, Quaternion.identity);
         }
+    }
+
+    public void IncreaseScore(int incVal)
+    {
+        scoreVal += incVal;
+        scoreText.text = scoreVal.ToString();
+    }
+
+    public void PauseGame()
+    {
+        pausePanel.SetActive(true);
+        Time.timeScale = 0f;
+        shootBtn.gameObject.SetActive(false);
+    }
+
+    public void ResumeGame()
+    {
+        pausePanel.SetActive(false);
+        Time.timeScale = 1f;
+        shootBtn.gameObject.SetActive(true);
+    }
+
+    public void ExitGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
+        shootBtn.gameObject.SetActive(false);
+    }
+
+    public void GameOver()
+    {
+        Time.timeScale = 0f;
+        gameoverPanel.SetActive(true);
+        shootBtn.gameObject.SetActive(false);
+    }
+
+    public void Restart()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Gameplay");
+        shootBtn.gameObject.SetActive(true);
     }
 }

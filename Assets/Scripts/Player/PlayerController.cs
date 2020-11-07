@@ -1,19 +1,25 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : GameController
 {
     public Transform bulletStart;
     public GameObject bullet;
     public ParticleSystem shootFX;
+    [HideInInspector] public bool canShoot;
 
+    private Animator shootSlider;
     private Rigidbody myBody;
 
     // Start is called before the first frame update
     void Start()
     {
         myBody = GetComponent<Rigidbody>();
+        GameObject.Find("ShootBtn").GetComponent<Button>().onClick.AddListener(ShootController);
+        shootSlider = GameObject.Find("ReloadBar").GetComponent<Animator>();
+        canShoot = true;
     }
 
     // Update is called once per frame
@@ -21,7 +27,7 @@ public class PlayerController : GameController
     {
         ControlPlayer();
         ChangeRotation();
-        ShootController();
+        /*ShootController();*/
     }
 
     void FixedUpdate()
@@ -95,11 +101,17 @@ public class PlayerController : GameController
 
     public void ShootController()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Time.timeScale != 0)
         {
-            GameObject bulletgo = Instantiate(bullet, bulletStart.position, Quaternion.identity);
-            bulletgo.GetComponent<Bullet>().MoveBullet(2000f);
-            shootFX.Play();
+            if (canShoot)
+            {
+                GameObject bulletgo = Instantiate(bullet, bulletStart.position, Quaternion.identity);
+                bulletgo.GetComponent<Bullet>().MoveBullet(2000f);
+                shootFX.Play();
+
+                canShoot = false;
+                shootSlider.Play("FadeIn");
+            }
         }
     }
 }

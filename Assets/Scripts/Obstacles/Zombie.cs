@@ -52,6 +52,7 @@ public class Zombie : MonoBehaviour
             Instantiate(bloodFX, transform.position, Quaternion.identity);
             StartCoroutine("Destroyem");
 
+            GameplayManager.instance.IncreaseScore(1);
         }
     }
 }
